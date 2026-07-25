@@ -79,6 +79,7 @@ getgenv().library = {
     },
     colorpicker_open = false; 
     gui; 
+    rainbow_colors = {};
 }
 
 local themes = {
@@ -886,7 +887,7 @@ local config_flags = library.config_flags
     local fps = 0
     local watermark_delay = tick() 
 
-    run.RenderStepped:Connect(function()
+    run.RenderStepped:Connect(function(dt)
         fps += 1
 
         if tick() - watermark_delay > 1 then 
@@ -894,6 +895,13 @@ local config_flags = library.config_flags
             local ping = math.floor(stats.PerformanceStats.Ping:GetValue()) .. "ms"                
             watermark.update_text(string.format("penoid9 - fps: %s - ping: %s", fps, ping))
             fps = 0
+        end
+
+        for _, entry in library.rainbow_colors do
+            if entry.enabled then
+                entry.hue = (entry.hue + dt * entry.speed * 0.25) % 1
+                entry.apply()
+            end
         end
     end)
     
@@ -1716,7 +1724,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Position = dim2(0.6888179183006287, 0, 0.24751244485378265, 0);
                         BorderColor3 = rgb(0, 0, 0);
                         Visible = false;
-                        Size = dim2(0, 150, 0, 150);
+                        Size = dim2(0, 150, 0, 210);
                         BorderSizePixel = 0;
                         BackgroundColor3 = themes.preset[tostring(self.count)]
                     });	library:apply_theme(colorpicker, tostring(self.count), "BackgroundColor3")
@@ -1750,7 +1758,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                     
                     local textbox_holder = library:create("Frame", {
                         Parent = e;
-                        Position = dim2(0, 0, 1, -36);
+                        Position = dim2(0, 0, 1, -76);
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -1, 0, 16);
                         BorderSizePixel = 0;
@@ -1781,7 +1789,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Parent = e;
                         Position = dim2(1, -1, 0, 0);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 14, 1, -60);
+                        Size = dim2(0, 14, 1, -110);
                         BorderSizePixel = 0;
                         BackgroundColor3 = themes.preset.inline
                     }); library:apply_theme(hue_button, "inline", "BackgroundColor3")
@@ -1815,7 +1823,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Text = "";
                         AutoButtonColor = false;
                         Parent = e;
-                        Position = dim2(0, 0, 1, -48);
+                        Position = dim2(0, 0, 1, -98);
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -1, 0, 14);
                         BorderSizePixel = 0;
@@ -1860,7 +1868,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                     local saturation_value_button = library:create("TextButton", {
                         Parent = e;
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -20, 1, -60);
+                        Size = dim2(1, -20, 1, -110);
                         Text = "";
                         AutoButtonColor = false;
                         BorderSizePixel = 0;
@@ -1925,6 +1933,109 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Parent = saturation_button;
                         Color = rgbseq{rgbkey(0, rgb(0, 0, 0)), rgbkey(1, rgb(0, 0, 0))}
                     });
+
+                    -- Rainbow toggle
+                    local rainbow_row = library:create("TextButton", {
+                        Parent = e;
+                        Text = "";
+                        AutoButtonColor = false;
+                        BackgroundTransparency = 1;
+                        Position = dim2(0, 0, 1, -52);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, -1, 0, 14);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = rgb(255, 255, 255)
+                    });
+
+                    library:create("TextLabel", {
+                        FontFace = fonts["ProggyClean"];
+                        TextColor3 = rgb(255, 255, 255);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Text = "Rainbow";
+                        Parent = rainbow_row;
+                        Size = dim2(1, 0, 1, 0);
+                        Position = dim2(0, 1, 0, -1);
+                        BackgroundTransparency = 1;
+                        TextXAlignment = Enum.TextXAlignment.Left;
+                        BorderSizePixel = 0;
+                        TextSize = 12;
+                        BackgroundColor3 = rgb(255, 255, 255)
+                    });
+
+                    local rainbow_accent = library:create("Frame", {
+                        AnchorPoint = vec2(1, 0);
+                        Parent = rainbow_row;
+                        Position = dim2(1, 0, 0, 0);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(0, 12, 0, 12);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = themes.preset[tostring(self.count)]
+                    }); library:apply_theme(rainbow_accent, tostring(self.count), "BackgroundColor3")
+
+                    local rainbow_fill = library:create("Frame", {
+                        Parent = rainbow_accent;
+                        Position = dim2(0, 1, 0, 1);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, -2, 1, -2);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = themes.preset.inline
+                    }); library:apply_theme(rainbow_fill, tostring(self.count), "BackgroundColor3")
+
+                    -- Speed slider (under Rainbow)
+                    local speed_row = library:create("Frame", {
+                        Parent = e;
+                        BackgroundTransparency = 1;
+                        Position = dim2(0, 0, 1, -32);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, -1, 0, 26);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = rgb(255, 255, 255)
+                    });
+
+                    local speed_label = library:create("TextLabel", {
+                        FontFace = fonts["ProggyClean"];
+                        TextColor3 = rgb(255, 255, 255);
+                        RichText = true;
+                        BorderColor3 = rgb(0, 0, 0);
+                        Text = "Speed <font color='#AAAAAA'>- 1</font>";
+                        Parent = speed_row;
+                        Size = dim2(1, 0, 0, 0);
+                        Position = dim2(0, 1, 0, -2);
+                        BackgroundTransparency = 1;
+                        TextXAlignment = Enum.TextXAlignment.Left;
+                        BorderSizePixel = 0;
+                        AutomaticSize = Enum.AutomaticSize.XY;
+                        TextSize = 12;
+                        BackgroundColor3 = rgb(255, 255, 255)
+                    });
+
+                    local speed_outline = library:create("TextButton", {
+                        Parent = speed_row;
+                        Text = "";
+                        AutoButtonColor = false;
+                        Position = dim2(0, 0, 0, 13);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, 0, 0, 12);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = themes.preset[tostring(self.count)]
+                    }); library:apply_theme(speed_outline, tostring(self.count), "BackgroundColor3")
+
+                    local speed_inline = library:create("Frame", {
+                        Parent = speed_outline;
+                        Position = dim2(0, 1, 0, 1);
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(1, -2, 1, -2);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = themes.preset.inline
+                    }); library:apply_theme(speed_inline, "inline", "BackgroundColor3")
+
+                    local speed_accent = library:create("Frame", {
+                        Parent = speed_inline;
+                        BorderColor3 = rgb(0, 0, 0);
+                        Size = dim2(0.2, 0, 1, 0);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = themes.preset[tostring(self.count)]
+                    }); library:apply_theme(speed_accent, tostring(self.count), "BackgroundColor3")
                     
                     
                 -- 
@@ -1934,11 +2045,23 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                 local dragging_sat = false 
                 local dragging_hue = false 
                 local dragging_alpha = false 
+                local dragging_speed = false
 
                 local h, s, v = cfg.color:ToHSV() 
                 local a = cfg.alpha 
 
+                local rainbow_flag = cfg.flag .. "_Rainbow"
+                local speed_flag = cfg.flag .. "_RainbowSpeed"
+                local rainbow_entry = {
+                    enabled = false,
+                    hue = h,
+                    speed = 1,
+                    apply = function() end,
+                }
+
                 flags[cfg.flag] = {} 
+                flags[rainbow_flag] = false
+                flags[speed_flag] = 1
 
                 function cfg.set_visible(bool) 
                     colorpicker.Visible = bool
@@ -1995,9 +2118,36 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                     cfg.set(nil, nil)
                 end
 
+                function cfg.set_rainbow(bool)
+                    rainbow_entry.enabled = bool and true or false
+                    flags[rainbow_flag] = rainbow_entry.enabled
+                    rainbow_fill.BackgroundColor3 = rainbow_entry.enabled and themes.preset[tostring(self.count)] or themes.preset.inline
+                    if rainbow_entry.enabled then
+                        rainbow_entry.hue = h
+                    end
+                end
+
+                function cfg.set_speed(value)
+                    local valuee = tonumber(value)
+                    if valuee == nil then return end
+                    rainbow_entry.speed = clamp(library:round(valuee, 0.1), 0.1, 5)
+                    flags[speed_flag] = rainbow_entry.speed
+                    speed_accent.Size = dim2((rainbow_entry.speed - 0.1) / (5 - 0.1), 0, 1, 0)
+                    speed_label.Text = "Speed <font color='#AAAAAA'>- " .. tostring(rainbow_entry.speed) .. "</font>"
+                end
+
+                rainbow_entry.apply = function()
+                    cfg.set(hsv(rainbow_entry.hue, s, v))
+                end
+
+                insert(library.rainbow_colors, rainbow_entry)
+
                 cfg.set(cfg.color, cfg.alpha)
+                cfg.set_speed(1)
                 
                 config_flags[cfg.flag] = cfg.set
+                config_flags[rainbow_flag] = cfg.set_rainbow
+                config_flags[speed_flag] = cfg.set_speed
             -- 
             
             -- Connections 
@@ -2010,6 +2160,11 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                 uis.InputChanged:Connect(function(input)
                     if (dragging_sat or dragging_hue or dragging_alpha) and input.UserInputType == Enum.UserInputType.MouseMovement then
                         cfg.update_color() 
+                    elseif dragging_speed and input.UserInputType == Enum.UserInputType.MouseMovement then
+                        local mouse = uis:GetMouseLocation()
+                        local offset = vec2(mouse.X, mouse.Y - gui_offset)
+                        local pct = math.clamp((offset.X - speed_outline.AbsolutePosition.X) / speed_outline.AbsoluteSize.X, 0, 1)
+                        cfg.set_speed(0.1 + pct * (5 - 0.1))
                     end
                 end)
 
@@ -2018,6 +2173,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         dragging_sat = false
                         dragging_hue = false
                         dragging_alpha = false  
+                        dragging_speed = false
 
                         if not (library:mouse_in_frame(colorpicker_element) or library:mouse_in_frame(colorpicker)) then 
                             cfg.open = false
@@ -2035,8 +2191,19 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                 end)
                 
                 saturation_button.MouseButton1Down:Connect(function()
-                    print("hiu")
                     dragging_sat = true  
+                end)
+
+                rainbow_row.MouseButton1Click:Connect(function()
+                    cfg.set_rainbow(not rainbow_entry.enabled)
+                end)
+
+                speed_outline.MouseButton1Down:Connect(function()
+                    dragging_speed = true
+                    local mouse = uis:GetMouseLocation()
+                    local offset = vec2(mouse.X, mouse.Y - gui_offset)
+                    local pct = math.clamp((offset.X - speed_outline.AbsolutePosition.X) / speed_outline.AbsoluteSize.X, 0, 1)
+                    cfg.set_speed(0.1 + pct * (5 - 0.1))
                 end)
                 
                 textbox.FocusLost:Connect(function()
