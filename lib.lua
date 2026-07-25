@@ -899,7 +899,8 @@ local config_flags = library.config_flags
 
         for _, entry in library.rainbow_colors do
             if entry.enabled then
-                entry.hue = (entry.hue + dt * entry.speed * 0.25) % 1
+                -- Smooth clock-based cycle (full sat/value so white defaults still rainbow)
+                entry.hue = (tick() * entry.speed * 0.22) % 1
                 entry.apply()
             end
         end
