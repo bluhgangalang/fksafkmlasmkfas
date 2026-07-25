@@ -1724,7 +1724,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Position = dim2(0.6888179183006287, 0, 0.24751244485378265, 0);
                         BorderColor3 = rgb(0, 0, 0);
                         Visible = false;
-                        Size = dim2(0, 150, 0, 210);
+                        Size = dim2(0, 150, 0, 248);
                         BorderSizePixel = 0;
                         BackgroundColor3 = themes.preset[tostring(self.count)]
                     });	library:apply_theme(colorpicker, tostring(self.count), "BackgroundColor3")
@@ -1734,6 +1734,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, 0, 1, 0);
                         BorderSizePixel = 0;
+                        ClipsDescendants = false;
                         BackgroundColor3 = themes.preset[tostring(self.count)]
                     }); library:apply_theme(a, tostring(self.count), "BackgroundColor3")
                     
@@ -1745,12 +1746,13 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(0, 0, 0);
                         BackgroundTransparency = 0.6;
+                        ClipsDescendants = false;
                         ZIndex = -1
                     }); 
 
                     local _ = library:create("UIPadding", {
                         PaddingTop = dim(0, 7);
-                        PaddingBottom = dim(0, -13);
+                        PaddingBottom = dim(0, 8);
                         Parent = e;
                         PaddingRight = dim(0, 6);
                         PaddingLeft = dim(0, 7)
@@ -1758,7 +1760,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                     
                     local textbox_holder = library:create("Frame", {
                         Parent = e;
-                        Position = dim2(0, 0, 1, -76);
+                        Position = dim2(0, 0, 1, -90);
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -1, 0, 16);
                         BorderSizePixel = 0;
@@ -1789,7 +1791,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Parent = e;
                         Position = dim2(1, -1, 0, 0);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 14, 1, -110);
+                        Size = dim2(0, 14, 1, -124);
                         BorderSizePixel = 0;
                         BackgroundColor3 = themes.preset.inline
                     }); library:apply_theme(hue_button, "inline", "BackgroundColor3")
@@ -1823,7 +1825,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Text = "";
                         AutoButtonColor = false;
                         Parent = e;
-                        Position = dim2(0, 0, 1, -98);
+                        Position = dim2(0, 0, 1, -112);
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -1, 0, 14);
                         BorderSizePixel = 0;
@@ -1868,7 +1870,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                     local saturation_value_button = library:create("TextButton", {
                         Parent = e;
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -20, 1, -110);
+                        Size = dim2(1, -20, 1, -124);
                         Text = "";
                         AutoButtonColor = false;
                         BorderSizePixel = 0;
@@ -1940,7 +1942,7 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                         Text = "";
                         AutoButtonColor = false;
                         BackgroundTransparency = 1;
-                        Position = dim2(0, 0, 1, -52);
+                        Position = dim2(0, 0, 1, -64);
                         BorderColor3 = rgb(0, 0, 0);
                         Size = dim2(1, -1, 0, 14);
                         BorderSizePixel = 0;
@@ -1985,9 +1987,9 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                     local speed_row = library:create("Frame", {
                         Parent = e;
                         BackgroundTransparency = 1;
-                        Position = dim2(0, 0, 1, -32);
+                        Position = dim2(0, 0, 1, -42);
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(1, -1, 0, 26);
+                        Size = dim2(1, -1, 0, 28);
                         BorderSizePixel = 0;
                         BackgroundColor3 = rgb(255, 255, 255)
                     });
@@ -2137,7 +2139,8 @@ fpsLabel.Text = "FPS: " .. tostring(math.floor(realFPS))
                 end
 
                 rainbow_entry.apply = function()
-                    cfg.set(hsv(rainbow_entry.hue, s, v))
+                    -- Force full sat/value so white/gray defaults still rainbow visibly
+                    cfg.set(hsv(rainbow_entry.hue, 1, 1))
                 end
 
                 insert(library.rainbow_colors, rainbow_entry)
