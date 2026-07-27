@@ -884,27 +884,24 @@ local config_flags = library.config_flags
     end 
 
     local watermark = library:watermark({name = "penoid9 - 100 fps - 100 ping"})
+    library._penoid_watermark = watermark
     local fps = 0
-    local watermark_delay = tick() 
+    local watermark_delay = tick()
+    local fpsAccum = 0
 
-    run.RenderStepped:Connect(function(dt)
-        fps += 1
-
-        if tick() - watermark_delay > 1 then 
-            watermark_delay = tick()
-            local ping = math.floor(stats.PerformanceStats.Ping:GetValue()) .. "ms"                
-            watermark.update_text(string.format("penoid9 - fps: %s - ping: %s", fps, ping))
-            fps = 0
+    -- Heartbeat only — old RenderStepped ran every frame (rainbow scan + fps++) even idle.
+    run.Heartbeat:Connect(function()
+        fpsAccum += 1
+        if tick() - watermark_delay <= 1 then
+            return
         end
-
-        for _, entry in library.rainbow_colors do
-            if entry.enabled then
-                -- Smooth clock-based cycle (full sat/value so white defaults still rainbow)
-                entry.hue = (tick() * entry.speed * 0.22) % 1
-                entry.apply()
-            end
-        end
+        watermark_delay = tick()
+        fps = fpsAccum
+        fpsAccum = 0
+        local ping = math.floor(stats.PerformanceStats.Ping:GetValue()) .. "ms"
+        watermark.update_text(string.format("penoid9 - fps: %s - ping: %s", fps, ping))
     end)
+    -- Rainbow is driven by the main script (LPH_NO_VIRTUALIZE rainbowTick), not here.
     
     --[[
         local pingTimeSec = game.Players.LocalPlayer:GetNetworkPing()
